@@ -251,7 +251,7 @@ function getSegment(angle) {
             if (angle >= start || angle < end) return seg;
         }
     }
-    
+
     return null;
 }
 
@@ -277,11 +277,30 @@ function getHitInfo(x, y) {
     }`;
 }
 
+const hits = [];
+
+function drawHits() {
+    for (const hit of hits) {
+        ctx.beginPath();
+        ctx.arc(hit.x, hit.y, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgb(255, 255, 0)"; // transparent blue
+        ctx.fill();
+        ctx.strokeStyle = "rgba(0, 0, 180, 1)";
+        ctx.stroke();
+    }
+}
+
 canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-    const infoText = getHitInfo(mouseX, mouseY);
-    document.getElementById("hitInfo").textContent = "Hit: " + infoText;
+    hits.push({ x, y });
+
+    // Redraw board and hits
+    drawDartboard();
+    drawHits();
+
+    const info = getHitInfo(x, y);
+    document.getElementById("hitInfo").textContent = "Hit: " + info;
 });
