@@ -182,3 +182,106 @@ function drawDartboard() {
 }
 
 drawDartboard();
+
+// ================== Scoring logic ==================
+
+function getDartboardSegmentsInfo() {
+    const info = [];
+    const anglePerSegment = (2 * Math.PI) / segments;
+    const offset = -Math.PI / 2 + anglePerSegment / 2 - Math.PI / 9; // TODO: look for better solution
+
+    for (let i = 0; i < segments; i++) {
+        const startAngle = i * anglePerSegment + offset;
+        const endAngle = startAngle + anglePerSegment;
+
+        info.push({
+            number: numbers[i],
+            angles: { start: startAngle, end: endAngle },
+            rings: {
+                innerBull: { innerRadius: 0, outerRadius: radius * 0.05 },
+                outerBull: { innerRadius: radius * 0.05, outerRadius: radius * 0.1 },
+                singleInner: { innerRadius: radius * 0.1, outerRadius: radius * 0.58 },
+                triple: { innerRadius: radius * 0.58, outerRadius: radius * 0.65 },
+                singleOuter: { innerRadius: radius * 0.65, outerRadius: radius * 0.92 },
+                double: { innerRadius: radius * 0.92, outerRadius: radius },
+            },
+        });
+    }
+
+    return info;
+}
+
+// Normalize angle to [0, 2PI)
+function normalizeAngle(angle) {
+    while (angle < 0) angle += 2 * Math.PI;
+    while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
+
+    return angle;
+}
+
+// Find which ring was hit based on radius
+function getRing(r) {
+    if (r <= radius * 0.04) return { ring: "Inner Bull", multiplier: 50 };
+    if (r > radius * 0.04 && r <= radius * 0.1)
+        return { ring: "Outer Bull", multiplier: 25 };
+    if (r > radius * 0.1 && r <= radius * 0.58)
+        return { ring: "Single (Inner)", multiplier: 1 };
+    if (r > radius * 0.58 && r <= radius * 0.65) return { ring: "Triple", multiplier: 3 };
+    if (r > radius * 0.65 && r <= radius * 0.92)
+        return { ring: "Single (Outer)", multiplier: 1 };
+    if (r > radius * 0.92 && r <= radius) return { ring: "Double", multiplier: 2 };
+
+    return null; // outside dartboard
+}
+
+// Find which segment based on angle
+function getSegment(angle) {
+    const segmentsInfo = getDartboardSegmentsInfo();
+    angle = normalizeAngle(angle);
+
+    for (const seg of segmentsInfo) {
+        const start = normalizeAngle(seg.angles.start);
+        const end = normalizeAngle(seg.angles.end);
+
+        // Because angles wrap around 2PI, check carefully:
+        if (start < end) {
+            if (angle >= start && angle < end) return seg;
+        } else {
+            // segment crosses 0 radians
+            if (angle >= start || angle < end) return seg;
+        }
+    }
+    
+    return null;
+}
+
+// Main function to get hit info from mouse coordinates
+function getHitInfo(x, y) {
+    const dx = x - cx;
+    const dy = y - cy;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx);
+
+    const ringInfo = getRing(r);
+    if (!ringInfo) return "Missed the board";
+
+    if (ringInfo.ring === "Inner Bull" || ringInfo.ring === "Outer Bull") {
+        return `${ringInfo.ring} (${ringInfo.multiplier} points)`;
+    }
+
+    const segment = getSegment(angle);
+    if (!segment) return "Missed the board";
+
+    return `${ringInfo.ring} - Number: ${segment.number} - Score: ${
+        segment.number * ringInfo.multiplier
+    }`;
+}
+
+canvas.addEventListener("click", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const infoText = getHitInfo(mouseX, mouseY);
+    document.getElementById("hitInfo").textContent = "Hit: " + infoText;
+});
