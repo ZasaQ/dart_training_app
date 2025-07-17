@@ -188,7 +188,7 @@ drawDartboard();
 function getDartboardSegmentsInfo() {
     const info = [];
     const anglePerSegment = (2 * Math.PI) / segments;
-    const offset = -Math.PI / 2 + anglePerSegment / 2 - Math.PI / 9; // TODO: look for better solution
+    const offset = -Math.PI / 2 + anglePerSegment / 2 - Math.PI / 10; // TODO: look for better solution
 
     for (let i = 0; i < segments; i++) {
         const startAngle = i * anglePerSegment + offset;
@@ -266,41 +266,126 @@ function getHitInfo(x, y) {
     if (!ringInfo) return "Missed the board";
 
     if (ringInfo.ring === "Inner Bull" || ringInfo.ring === "Outer Bull") {
-        return `${ringInfo.ring} (${ringInfo.multiplier} points)`;
+        return `${ringInfo.ring} - Score: ${ringInfo.multiplier}`;
     }
 
     const segment = getSegment(angle);
     if (!segment) return "Missed the board";
 
-    return `${ringInfo.ring} - Number: ${segment.number} - Score: ${
+    return `Number: ${segment.number} - ${ringInfo.ring} - Score: ${
         segment.number * ringInfo.multiplier
     }`;
 }
 
-const hits = [];
+let hits = [];
+let totalScore = 0;
 
 function drawHits() {
-    for (const hit of hits) {
+    for (let i = 0; i < hits.length; i++) {
+        const hit = hits[i];
         ctx.beginPath();
-        ctx.arc(hit.x, hit.y, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = "rgb(255, 255, 0)"; // transparent blue
+        ctx.arc(hit.x, hit.y, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(255, 255, 0, 1)";
         ctx.fill();
         ctx.strokeStyle = "rgba(0, 0, 180, 1)";
         ctx.stroke();
+
+        ctx.fillStyle = "yellow";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(i + 1, hit.x, hit.y - 10);
     }
 }
 
-canvas.addEventListener("click", (event) => {
+function simulateSingleThrow() {
+    const angle = Math.random() * 2 * Math.PI;
+    const dist = Math.random() * radius;
+    const x = cx + dist * Math.cos(angle);
+    const y = cy + dist * Math.sin(angle);
+
+    const info = getHitInfo(x, y);
+
+    hits.push({ x, y });
+
+    const scoreMatch = info.match(/Score: (\d+)/);
+    if (scoreMatch) {
+        totalScore += parseInt(scoreMatch[1]);
+    }
+
+    // Redraw board and hits
+    drawDartboard();
+    drawHits();
+
+    const infoBox = document.getElementById("hitInfo");
+    infoBox.innerHTML += `<br>Throw ${hits.length}: ${info}`;
+
+    if (hits.length === 3) {
+        infoBox.innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+    }
+}
+
+let simulateThrowsInterval = null;
+
+function simulateThrows() {
+    if (simulateThrowsInterval !== null) {
+        clearInterval(simulateThrowsInterval);
+        simulateThrowsInterval = null;
+    }
+
+    hits = [];
+    totalScore = 0;
+    drawDartboard();
+    canvas.removeEventListener("click", manualThrow);
+    document.getElementById("hitInfo").textContent = "Hit:";
+    document.getElementById("resetThrowsButton").disabled = true;
+
+    let i = 0;
+    simulateThrowsInterval = setInterval(() => {
+        simulateSingleThrow();
+        i++;
+        if (i >= 3) {
+            clearInterval(simulateThrowsInterval);
+            simulateThrowsInterval = null;
+            document.getElementById("resetThrowsButton").disabled = false;
+            canvas.addEventListener("click", manualThrow);
+        }
+    }, 1000);
+}
+
+function manualThrow() {
+    if (hits.length >= 3) return;
+
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
     hits.push({ x, y });
 
-    // Redraw board and hits
     drawDartboard();
     drawHits();
 
     const info = getHitInfo(x, y);
-    document.getElementById("hitInfo").textContent = "Hit: " + info;
-});
+    document.getElementById("hitInfo").innerHTML += `<br>Throw ${hits.length}: ${info}`;
+
+    const scoreMatch = info.match(/Score: (\d+)/);
+    if (scoreMatch) {
+        totalScore += parseInt(scoreMatch[1]);
+    }
+
+    if (hits.length === 3) {
+        document.getElementById("hitInfo").innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+    }
+
+    document.getElementById("resetThrowsButton").disabled = false;
+}
+
+// Manual throw by clicking
+canvas.addEventListener("click", manualThrow);
+
+function resetGame() {
+    hits = [];
+    totalScore = 0;
+    drawDartboard();
+    document.getElementById("hitInfo").textContent = "Hit:";
+    document.getElementById("resetThrowsButton").disabled = true;
+}
