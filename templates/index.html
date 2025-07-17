@@ -12,23 +12,63 @@
 				align-items: center;
 				margin-top: 50px;
 			}
+
 			canvas {
 				background: transparent;
 			}
+
 			#hitInfo {
 				margin-top: 20px;
 				font-size: 18px;
 				font-weight: bold;
 				min-height: 24px;
 			}
+
+			.input-score-wrapper {
+				display: flex;
+				width: 300px;
+				position: relative;
+			}
+
+			#scoreInput {
+				flex-grow: 1;
+				transition: width 0.2s ease;
+				width: 100%;
+				box-sizing: border-box;
+				padding: 8px;
+			}
+
+			#submitScoreButton {
+				width: 80px;
+				margin-left: 10px;
+				transition: opacity 0.2s ease;
+				opacity: 0;
+				pointer-events: none;
+			}
+
+			/* When active (JS adds this class) */
+			.show-button #submitScoreButton {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.show-button #scoreInput {
+				width: calc(100% - 90px);
+			}
 		</style>
 	</head>
 	<body>
 		<canvas id="dartboard" width="500" height="500">
 		</canvas>
+		<script src="static/script.js"></script>
 		<button id="simulateThrowsButton" onclick="simulateThrows()">Simulate Throws</button>
 		<pre id="hitInfo">Hit:</pre>
-		<script src="static/script.js"></script>
+
+		<div class="input-score-wrapper" id="inputScoreWrapper">
+			<input type="text" id="scoreInput" placeholder="Enter a score (0-180)">
+			<button id="submitScoreButton" onclick="checkScore()" disabled>Submit</button>
+		</div>
+		<br>
 		<button id="resetThrowsButton" onclick="resetGame()" disabled>Reset</button>
 	</body>
 </html>

@@ -321,6 +321,7 @@ function simulateSingleThrow() {
 
     if (hits.length === 3) {
         infoBox.innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+        document.getElementById("submitScoreButton").disabled = false;
     }
 }
 
@@ -338,6 +339,7 @@ function simulateThrows() {
     canvas.removeEventListener("click", manualThrow);
     document.getElementById("hitInfo").textContent = "Hit:";
     document.getElementById("resetThrowsButton").disabled = true;
+    document.getElementById("submitScoreButton").disabled = true;
 
     let i = 0;
     simulateThrowsInterval = setInterval(() => {
@@ -374,6 +376,7 @@ function manualThrow() {
 
     if (hits.length === 3) {
         document.getElementById("hitInfo").innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+        document.getElementById("submitScoreButton").disabled = false;
     }
 
     document.getElementById("resetThrowsButton").disabled = false;
@@ -382,10 +385,55 @@ function manualThrow() {
 // Manual throw by clicking
 canvas.addEventListener("click", manualThrow);
 
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('scoreInput');
+  const wrapper = document.getElementById('inputScoreWrapper');
+
+  input.addEventListener('input', () => {
+    let value = input.value;
+
+    // Remove non-digit characters
+    value = value.replace(/[^0-9]/g, '');
+
+    // Limit to 180, max
+    if (value !== '' && Number(value) > 180) {
+      value = '180';
+    }
+
+    input.value = value;
+
+    // Show or hide button
+    if (value !== '') {
+      wrapper.classList.add('show-button');
+    } else {
+      wrapper.classList.remove('show-button');
+    }
+  });
+});
+
+function checkScore() {
+  if (hits.length !== 3) return;
+
+  const input = document.getElementById('scoreInput');
+  const value = Number(input.value);
+
+  if (isNaN(value) || value < 0 || value > 180) {
+    alert("Please enter a valid number between 0 and 180.");
+    return;
+  }
+
+  if (value === totalScore) {
+    alert("Correct!");
+  } else {
+    alert("Incorrect, try again.");
+  }
+}
+
 function resetGame() {
     hits = [];
     totalScore = 0;
     drawDartboard();
     document.getElementById("hitInfo").textContent = "Hit:";
     document.getElementById("resetThrowsButton").disabled = true;
+    document.getElementById("submitScoreButton").disabled = true;
 }
