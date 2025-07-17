@@ -2,19 +2,22 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>
-			Dart Training
-		</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dart Training</title>
 		<style>
 			body {
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				margin-top: 50px;
+				margin: 50px auto;
+				padding: 0 15px;
+				font-family: Arial, sans-serif;
 			}
 
 			canvas {
 				background: transparent;
+				max-width: 100%;
+				height: auto;
 			}
 
 			#hitInfo {
@@ -22,12 +25,15 @@
 				font-size: 18px;
 				font-weight: bold;
 				min-height: 24px;
+				text-align: center;
 			}
 
 			.input-score-wrapper {
 				display: flex;
-				width: 300px;
+				width: 100%;
+				max-width: 300px;
 				position: relative;
+				margin-top: 20px;
 			}
 
 			#scoreInput {
@@ -35,7 +41,8 @@
 				transition: width 0.2s ease;
 				width: 100%;
 				box-sizing: border-box;
-				padding: 8px;
+				padding: 10px;
+				font-size: 16px;
 			}
 
 			#submitScoreButton {
@@ -44,9 +51,10 @@
 				transition: opacity 0.2s ease;
 				opacity: 0;
 				pointer-events: none;
+				font-size: 16px;
 			}
 
-			/* When active (JS adds this class) */
+			/* Show button when class is toggled in JS */
 			.show-button #submitScoreButton {
 				opacity: 1;
 				pointer-events: auto;
@@ -55,23 +63,45 @@
 			.show-button #scoreInput {
 				width: calc(100% - 90px);
 			}
+
+			#simulateThrowsButton,
+			#resetThrowsButton {
+				margin-top: 15px;
+				padding: 10px 20px;
+				font-size: 16px;
+			}
+
+			label {
+				margin-top: 15px;
+				font-size: 16px;
+			}
+
+			input[type="checkbox"] {
+				margin-right: 8px;
+				transform: scale(1.2);
+			}
 		</style>
 	</head>
 	<body>
-		<canvas id="dartboard" width="500" height="500">
-		</canvas>
+		<canvas id="dartboard" width="500" height="500"></canvas>
+
 		<script src="static/script.js"></script>
+
 		<button id="simulateThrowsButton" onclick="simulateThrows()">Simulate Throws</button>
-		<br>
-		<input type="checkbox" id="showTotalScoreCheck">
-		<label for="showTotalScoreCheck">Show Total Score</label>
+
+		<label>
+			<input type="checkbox" id="showTotalScoreCheck">
+			Show Total Score
+		</label>
+
 		<pre id="hitInfo">Hit:</pre>
 
 		<div class="input-score-wrapper" id="inputScoreWrapper">
-			<input type="tel" id="scoreInput" pattern="[0-9]*" inputmode="numeric" ... >
+			<input type="tel" id="scoreInput" pattern="[0-9]*" inputmode="numeric" placeholder="Enter score (0 - 180)">
 			<button id="submitScoreButton" onclick="checkScore()" disabled>Submit</button>
 		</div>
-		<br>
+
 		<button id="resetThrowsButton" onclick="resetGame()" disabled>Reset</button>
+
 	</body>
 </html>
