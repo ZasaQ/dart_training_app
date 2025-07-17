@@ -434,6 +434,7 @@ function resetGame() {
     totalScore = 0;
     drawDartboard();
     document.getElementById("hitInfo").textContent = "Hit:";
+    document.getElementById('scoreInput').value = "";
     document.getElementById("resetThrowsButton").disabled = true;
     document.getElementById("submitScoreButton").disabled = true;
 }
