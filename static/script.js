@@ -317,10 +317,14 @@ function simulateSingleThrow() {
     drawHits();
 
     const infoBox = document.getElementById("hitInfo");
+    const showTotalScoreCheck = document.getElementById("showTotalScoreCheck");
     infoBox.innerHTML += `<br>Throw ${hits.length}: ${info}`;
 
-    if (hits.length === 3) {
+    if (showTotalScoreCheck.checked) {
         infoBox.innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+    }
+
+    if (hits.length === 3) {
         document.getElementById("submitScoreButton").disabled = false;
     }
 }
@@ -374,8 +378,12 @@ function manualThrow() {
         totalScore += parseInt(scoreMatch[1]);
     }
 
+    const showTotalScoreCheck = document.getElementById("showTotalScoreCheck")
+    if (showTotalScoreCheck.checked) {
+        infoBox.innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
+    }
+
     if (hits.length === 3) {
-        document.getElementById("hitInfo").innerHTML += `<br><strong>Total Score: ${totalScore}</strong>`;
         document.getElementById("submitScoreButton").disabled = false;
     }
 
